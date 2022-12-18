@@ -34,47 +34,48 @@ jobs:
         name: wheels
         path: dist
 
-  windows:
-    runs-on: windows-latest
-    steps:
+# RIP
+  # windows:
+  #   runs-on: windows-latest
+  #   steps:
 
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
 
-    # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
-    - shell: bash
-      run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
-    - uses: actions/checkout@v3
-    - uses: PyO3/maturin-action@v1
-      with:
-        command: build
-        args: --release -o dist --find-interpreter
-    - name: Upload wheels
-      uses: actions/upload-artifact@v3
-      with:
-        name: wheels
-        path: dist
+  #   # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+  #   - shell: bash
+  #     run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
+  #   - uses: actions/checkout@v3
+  #   - uses: PyO3/maturin-action@v1
+  #     with:
+  #       command: build
+  #       args: --release -o dist --find-interpreter
+  #   - name: Upload wheels
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: wheels
+  #       path: dist
 
-  macos:
-    runs-on: macos-latest
-    steps:
+  # macos:
+  #   runs-on: macos-latest
+  #   steps:
 
-    - name: Checkout
-      uses: actions/checkout@v3
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
 
-    # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
-    - shell: bash
-      run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
-    - uses: actions/checkout@v3
-    - uses: PyO3/maturin-action@v1
-      with:
-        command: build
-        args: --release -o dist --universal2 --find-interpreter
-    - name: Upload wheels
-      uses: actions/upload-artifact@v3
-      with:
-        name: wheels
-        path: dist
+  #   # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+  #   - shell: bash
+  #     run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
+  #   - uses: actions/checkout@v3
+  #   - uses: PyO3/maturin-action@v1
+  #     with:
+  #       command: build
+  #       args: --release -o dist --universal2 --find-interpreter
+  #   - name: Upload wheels
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: wheels
+  #       path: dist
 
   release:
     name: Release
