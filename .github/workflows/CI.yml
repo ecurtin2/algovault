@@ -24,8 +24,6 @@ jobs:
         sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
         echo Contents of Cargo.toml:
         cat Cargo.toml
-
-    - uses: actions/checkout@v3
     - uses: PyO3/maturin-action@v1
       with:
         manylinux: auto
@@ -48,7 +46,6 @@ jobs:
   #   # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
   #   - shell: bash
   #     run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
-  #   - uses: actions/checkout@v3
   #   - uses: PyO3/maturin-action@v1
   #     with:
   #       command: build
@@ -69,7 +66,6 @@ jobs:
   #   # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
   #   - shell: bash
   #     run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
-  #   - uses: actions/checkout@v3
   #   - uses: PyO3/maturin-action@v1
   #     with:
   #       command: build
