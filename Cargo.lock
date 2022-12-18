@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "algovault"
-version = "0.1.0"
+version = "0.0.314159"
 dependencies = [
  "pyo3",
  "rusqlite",
