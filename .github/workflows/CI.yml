@@ -14,6 +14,10 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
+    # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+    - shell: bash
+      run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
+
     - uses: actions/checkout@v3
     - uses: PyO3/maturin-action@v1
       with:
@@ -29,6 +33,9 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
+    # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+    - shell: bash
+      run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
     - uses: actions/checkout@v3
     - uses: PyO3/maturin-action@v1
       with:
@@ -43,6 +50,9 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
+    # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+    - shell: bash
+      run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
     - uses: actions/checkout@v3
     - uses: PyO3/maturin-action@v1
       with:
@@ -60,6 +70,9 @@ jobs:
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [ macos, windows, linux ]
     steps:
+      # https://github.com/PyO3/maturin/issues/199#issuecomment-1003856256
+      - shell: bash
+        run: sed -i "s/0.0.314159/${{github.ref_name}}/g" Cargo.toml
       - uses: actions/download-artifact@v3
         with:
           name: wheels

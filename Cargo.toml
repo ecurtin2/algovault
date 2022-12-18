@@ -1,6 +1,8 @@
 [package]
 name = "algovault"
-version = "0.1.0"
+# This is replaced by CI so i just use a version not to clash with anything else
+# so I can sed it easily
+version = "0.0.314159"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
