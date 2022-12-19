@@ -11,5 +11,10 @@ name = "algovault"
 crate-type = ["cdylib"]
 
 [dependencies]
+futures = { version = "0.3" }
 pyo3 = { version = "0.17.3", features = ["extension-module"] }
-rusqlite = { version = "0.28.0" }
+sqlx = { version = "0.6.2", features = [ "runtime-tokio-rustls", "sqlite" ] }
+tokio = { version = "1.20.0", features = ["macros"]}
+anyhow = { version = "1.0" }
+uuid = { version = "1.2.2", features = ["v4"]}
+chrono = { version = "0.4.23" }
