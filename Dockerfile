@@ -1,4 +1,5 @@
-FROM python:3.11
+FROM python:3.11-slim
+RUN apt update && apt install git curl build-essential -y
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /bin
