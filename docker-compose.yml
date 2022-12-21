@@ -11,3 +11,4 @@ services:
       - .:/algovault
       # Don't mount target
       - cargo_target:/algovault/target
+      - ~/.gitconfig:/root/.gitconfig
