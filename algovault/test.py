@@ -8,8 +8,6 @@ import duckdb
 import polars as pl
 
 
-
-
 conn = duckdb.connect(database="algovault.duckdb", read_only=False)
 conn.execute("create table if not exists people(id INTEGER, name TEXT)")
 conn.execute("insert into people values (1, 'steve')")

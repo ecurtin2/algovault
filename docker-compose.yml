@@ -1,7 +1,13 @@
 version: '3.9'
 
+volumes:
+  cargo_target:
+
 services:
   dev:
     image: evamicur/algovault-dev:latest
     build: .
-    
+    volumes:
+      - .:/algovault
+      # Don't mount target
+      - cargo_target:/algovault/target

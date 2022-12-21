@@ -20,7 +20,7 @@ Experimentation tracking
     - computing common aggregates is crazy fast and requires little memory
 - no magic
     - no global context means you can paralellize fearlessly
-- 
+-
 
 ## Design
 
@@ -28,4 +28,3 @@ Experimentation tracking
 - runs end and the databases sent to checkpoint location
 - upon read, compact checkpoints to a single database instance (read replica)
 - read replica knows which instances have already been ingested, incremental update
-
