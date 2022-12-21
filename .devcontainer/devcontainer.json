@@ -1,0 +1,16 @@
+
+{
+    "name": "AoC",
+    "dockerComposeFile": "../docker-compose.yaml",
+    "service": "dev",
+    "workspaceFolder": "/algovault",
+	"shutdownAction": "stopCompose",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"sainnhe.everforest",
+				"ms-python.python"
+			]
+		}
+	}
+}
