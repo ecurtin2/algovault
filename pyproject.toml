@@ -24,3 +24,9 @@ altair = "alt"
 numpy = "np"
 pandas = "pd"
 seaborn = "sns"
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v"
+testpaths = ["tests"]

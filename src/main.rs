@@ -5,10 +5,5 @@ mod core;
 async fn main() -> anyhow::Result<()> {
     core::setup().await?;
 
-
-
-
-
-    
     Ok(())
 }

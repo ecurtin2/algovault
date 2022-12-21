@@ -1,7 +1,8 @@
 /target
 **.sqlite
-.ipynb_checkpoints
-.ruff_cache
+.ipynb_checkpoints/
+.ruff_cache/
+.mypy_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

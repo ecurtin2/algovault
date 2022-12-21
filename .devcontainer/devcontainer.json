@@ -9,7 +9,9 @@
 		"vscode": {
 			"extensions": [
 				"sainnhe.everforest",
-				"ms-python.python"
+				"ms-python.python",
+				"ms-toolsai.jupyter",
+				"rust-lang.rust-analyzer"
 			]
 		}
 	}
