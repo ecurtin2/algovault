@@ -1,10 +1,11 @@
 
 {
     "name": "AoC",
-    "dockerComposeFile": "../docker-compose.yaml",
+    "dockerComposeFile": "../docker-compose.yml",
     "service": "dev",
     "workspaceFolder": "/algovault",
 	"shutdownAction": "stopCompose",
+	"overrideCommand": true,
 	"customizations": {
 		"vscode": {
 			"extensions": [
