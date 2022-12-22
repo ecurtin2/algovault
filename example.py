@@ -1,3 +1,0 @@
-import algovault
-
-algovault.setup()

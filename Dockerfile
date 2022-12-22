@@ -18,3 +18,4 @@ RUN pip install -r requirements_dev.txt
 COPY . /algovault/
 RUN just build
 ENV PATH="/algovault/target/debug:${PATH}"
+ENTRYPOINT [ "just" ]

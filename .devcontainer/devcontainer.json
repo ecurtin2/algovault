@@ -12,7 +12,8 @@
 				"sainnhe.everforest",
 				"ms-python.python",
 				"ms-toolsai.jupyter",
-				"rust-lang.rust-analyzer"
+				"rust-lang.rust-analyzer",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	}
