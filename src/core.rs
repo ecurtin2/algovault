@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use chrono::offset::Utc;
 use chrono::DateTime;
-use sqlx::sqlite::SqlitePool;
+use sqlx::sqlite::{SqlitePool, SqliteQueryResult};
 use sqlx::{query, query_as, FromRow, Row};
 use std::fmt;
 use std::fs::File;
@@ -73,11 +73,15 @@ impl Table<'_> {
                 dtype: ColType::Uuid,
             },
             Column {
-                name: "created_on".to_string(),
+                name: "created_at".to_string(),
                 dtype: ColType::Time,
             },
             Column {
                 name: "last_modified".to_string(),
+                dtype: ColType::Time,
+            },
+            Column {
+                name: "completed_at".to_string(),
                 dtype: ColType::Time,
             },
         ];
@@ -128,8 +132,30 @@ impl Table<'_> {
             now_as_str(),
             run_id
         );
-        let id = query(&q).execute(&mut conn).await?.last_insert_rowid();
-        Ok(id)
+        let id = query(&q).execute(&mut conn).await;
+        match id {
+            Ok(id) => Ok(id.last_insert_rowid()),
+            Err(e) => {
+                // TODO: There's gotta be a smarter way to do this right?
+                if e.to_string().contains("no such column") {
+                    self.add_column(key).await?;
+                    Ok(query(&q).execute(&mut conn).await?.last_insert_rowid())
+                } else {
+                    Err(anyhow!(e))
+                }
+            }
+        }
+    }
+
+    async fn has_column(&self, col: &str) -> anyhow::Result<bool> {
+        let schema = self.get_schema().await?;
+        Ok(schema.iter().any(|c| c.name == col))
+    }
+
+    async fn add_column(&self, col: &str) -> anyhow::Result<u64> {
+        let mut conn = self.pool.acquire().await.unwrap();
+        let q = format!("ALTER TABLE {} ADD {} TEXT", self.name, col,);
+        Ok(query(&q).execute(&mut conn).await?.rows_affected())
     }
 
     async fn get_schema(&self) -> anyhow::Result<Vec<SqliteSchema>> {
@@ -160,12 +186,10 @@ impl Table<'_> {
     }
 }
 
-pub async fn setup() -> anyhow::Result<()> {
-    let path = Path::new("./algovault.sqlite");
+pub async fn setup(path: &Path) -> anyhow::Result<()> {
     if !path.exists() {
         File::create(path)?;
     }
-
     let pool = SqlitePool::connect(path.to_str().unwrap()).await?;
     let table = Table {
         name: "persons".to_string(),
@@ -179,6 +203,7 @@ pub async fn setup() -> anyhow::Result<()> {
     table.create().await?;
     let run = table.start_run(None).await?;
     table.set(run, "first_name", "Evan").await?;
+    table.set(run, "last_name", "Evan").await?;
     table.show().await?;
     Ok(())
 }
