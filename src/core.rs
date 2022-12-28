@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use chrono::offset::Utc;
 use chrono::DateTime;
+use futures::future::join_all;
 use sqlx::sqlite::{SqlitePool, SqliteQueryResult};
 use sqlx::{query, query_as, FromRow, Row};
 use std::fmt;
@@ -21,7 +22,7 @@ struct SqliteSchema {
 #[derive(Debug, Clone)]
 enum ColType {
     Text,
-    // Real,
+    Real,
     // Int,
     Time,
     Uuid,
@@ -34,6 +35,18 @@ impl fmt::Display for ColType {
     }
 }
 
+trait SqlValue: fmt::Display {
+    fn sqlite_type(&self) -> String;
+}
+
+impl SqlValue for String {
+    fn sqlite_type(&self) -> String {"TEXT".to_string()}
+}
+
+impl SqlValue for f64 {
+    fn sqlite_type(&self) -> String {"REAL".to_string()}
+}
+
 #[derive(Debug, Clone)]
 struct Column {
     name: String,
@@ -43,7 +56,7 @@ struct Column {
 fn to_sqlite(c: &Column) -> String {
     match c.dtype {
         ColType::Text => format!("{} {}", c.name, "TEXT"),
-        // ColType::Real => format!("{} {}", c.name, "REAL"),
+        ColType::Real => format!("{} {}", c.name, "REAL"),
         ColType::Uuid => format!("{} {}", c.name, "TEXT"),
         ColType::Time => format!("{} {}", c.name, "TEXT"),
         ColType::Category => format!("{} {}", c.name, "TEXT"),
@@ -106,7 +119,7 @@ impl Table<'_> {
             Some(id) => Ok(id),
             None => {
                 let q = format!(
-                    "INSERT INTO {} (run_id, created_on) VALUES (?, ?)",
+                    "INSERT INTO {} (run_id, created_at) VALUES (?, ?)",
                     self.name
                 );
                 let id = Uuid::new_v4();
@@ -120,9 +133,8 @@ impl Table<'_> {
         }
     }
 
-    async fn set(&self, run_id: Uuid, key: &str, value: &str) -> anyhow::Result<i64> {
+    async fn set(&self, run_id: Uuid, key: &str, value: String) -> anyhow::Result<i64> {
         // TODO: union types but the rust docs where down when i wrote this
-        let mut conn = self.pool.acquire().await.unwrap();
 
         let q = format!(
             "UPDATE {} SET {} = '{}', last_modified = '{}' WHERE run_id = '{}';",
@@ -132,14 +144,14 @@ impl Table<'_> {
             now_as_str(),
             run_id
         );
-        let id = query(&q).execute(&mut conn).await;
+        let id = query(&q).execute(self.pool).await;
         match id {
             Ok(id) => Ok(id.last_insert_rowid()),
             Err(e) => {
                 // TODO: There's gotta be a smarter way to do this right?
                 if e.to_string().contains("no such column") {
-                    self.add_column(key).await?;
-                    Ok(query(&q).execute(&mut conn).await?.last_insert_rowid())
+                    self.add_column(key.to_string()).await?;
+                    Ok(query(&q).execute(self.pool).await?.last_insert_rowid())
                 } else {
                     Err(anyhow!(e))
                 }
@@ -147,15 +159,15 @@ impl Table<'_> {
         }
     }
 
-    async fn has_column(&self, col: &str) -> anyhow::Result<bool> {
-        let schema = self.get_schema().await?;
-        Ok(schema.iter().any(|c| c.name == col))
-    }
+    // async fn has_column(&self, col: &str) -> anyhow::Result<bool> {
+    //     let schema = self.get_schema().await?;
+    //     Ok(schema.iter().any(|c| c.name == col))
+    // }
 
-    async fn add_column(&self, col: &str) -> anyhow::Result<u64> {
-        let mut conn = self.pool.acquire().await.unwrap();
-        let q = format!("ALTER TABLE {} ADD {} TEXT", self.name, col,);
-        Ok(query(&q).execute(&mut conn).await?.rows_affected())
+    async fn add_column(&self, name: String) -> anyhow::Result<u64> {
+        // let mut conn = self.pool.acquire().await.unwrap();
+        let q = format!("ALTER TABLE {} ADD {} {}", self.name, name, "TEXT");
+        Ok(query(&q).execute(self.pool).await?.rows_affected())
     }
 
     async fn get_schema(&self) -> anyhow::Result<Vec<SqliteSchema>> {
@@ -178,7 +190,10 @@ impl Table<'_> {
 
         for row in rows {
             for (i, col) in schema.iter().enumerate() {
-                print!(" {val:^30} ", val = row.get::<String, usize>(i));
+                match col.r#type.as_str() {
+                    "REAL" => print!(" {val:^30} ", val = row.get::<f64, usize>(i)),
+                    _ => print!(" {val:^30} ", val = row.get::<String, usize>(i)),
+                }
             }
             println!("");
         }
@@ -190,7 +205,8 @@ pub async fn setup(path: &Path) -> anyhow::Result<()> {
     if !path.exists() {
         File::create(path)?;
     }
-    let pool = SqlitePool::connect(path.to_str().unwrap()).await?;
+    // let pool = SqlitePool::connect(path.to_str().unwrap()).await?;
+    let pool = SqlitePool::connect("sqlite::memory:").await?;
     let table = Table {
         name: "persons".to_string(),
         columns: vec![Column {
@@ -201,9 +217,19 @@ pub async fn setup(path: &Path) -> anyhow::Result<()> {
     };
 
     table.create().await?;
-    let run = table.start_run(None).await?;
-    table.set(run, "first_name", "Evan").await?;
-    table.set(run, "last_name", "Evan").await?;
-    table.show().await?;
+    println!("Table Created");
+    let mut futures = Vec::new();
+    for _ in 0..1000 {
+        let run = table.start_run(None).await?;
+        // println!("Run {}", run);
+        futures.push(table.set(run, "first_name", "Evan".to_string()));
+        futures.push(table.set(run, "last_name", "Steve".to_string()));
+        // table.set(run, "some_float", &1.3).await?;
+    }
+    join_all(futures);
+    println!("Done!");
+    // table.show().await?;
+
     Ok(())
+
 }
